@@ -7,9 +7,26 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - .:/var/www/html
+      # Volume pour le développement persistant
+      - ./:/var/www/html
+      # Exclusion des dossiers spécifiques qui ne doivent pas être montés depuis l'hôte
+      - /var/www/html/vendor
+      - /var/www/html/node_modules
+      - /var/www/html/storage/framework/cache
+      - /var/www/html/storage/framework/sessions
+      - /var/www/html/storage/framework/views
     depends_on:
       - db
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: laravel
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      APP_ENV: local
+      APP_DEBUG: "true"
+
   db:
     image: mysql:8.0
     container_name: laravel_db

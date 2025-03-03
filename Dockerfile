@@ -1,32 +1,52 @@
 # Utiliser l'image PHP officielle avec Apache
 FROM php:8.2-apache
 
+# Installer les dépendances système nécessaires
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install zip pdo pdo_mysql gd
+
 # Activer mod_rewrite pour Laravel
 RUN a2enmod rewrite
 
-# Installer les extensions PHP nécessaires
-RUN docker-php-ext-install pdo pdo_mysql
+# Configurer le DocumentRoot d'Apache pour pointer vers le dossier public de Laravel
+RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|' /etc/apache2/sites-available/000-default.conf
+
+# Ajouter la configuration pour le répertoire public
+RUN echo '<Directory /var/www/html/public>\n\
+    AllowOverride All\n\
+    Require all granted\n\
+    Options Indexes FollowSymLinks\n\
+</Directory>' >> /etc/apache2/sites-available/000-default.conf
 
 # Définir le répertoire de travail
 WORKDIR /var/www/html
 
+# Installer Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
 # Copier les fichiers du projet dans le conteneur
 COPY . /var/www/html
 
-# Modifier la configuration Apache pour AllowOverride All
-RUN sed -i 's|AllowOverride None|AllowOverride All|' /etc/apache2/apache2.conf
+# Installer les dépendances de Laravel avec Composer
+RUN composer install --no-interaction --optimize-autoloader
 
-# Vérifier et créer le fichier .htaccess dans public/
-RUN touch /var/www/html/public/.htaccess && \
-    echo '<IfModule mod_rewrite.c>\n\
-    RewriteEngine On\n\
-    RewriteCond %{REQUEST_FILENAME} !-f\n\
-    RewriteCond %{REQUEST_FILENAME} !-d\n\
-    RewriteRule ^ index.php [L]\n\
-</IfModule>' > /var/www/html/public/.htaccess
+# Copier le fichier .env.example en .env si nécessaire
+RUN if [ -f .env.example ] && [ ! -f .env ]; then cp .env.example .env; fi
+
+# Générer la clé d'application Laravel
+RUN php artisan key:generate --force
 
 # Donner les permissions nécessaires à Laravel
-RUN chown -R www-data:www-data /var/www/html \
+RUN mkdir -p storage/logs \
+    && touch storage/logs/laravel.log \
+    && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
