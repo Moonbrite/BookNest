@@ -17,11 +17,12 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Install Docker
-        run: sudo apt-get update
-          sudo apt-get install -y docker.io
+        run: |
+          sudo apt-get update && sudo apt-get install -y docker.io docker-compose
 
       - name: Check Docker installation
-        run: docker --version
+        run: |
+          docker --version
           docker-compose --version
 
       - name: Build and start Docker containers
