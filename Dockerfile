@@ -50,5 +50,9 @@ RUN mkdir -p storage/logs \
     && chmod -R 755 /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
+RUN composer require --dev nunomaduro/larastan
+
+RUN php artisan l5-swagger:generate
+
 # Exposer le port 80
 EXPOSE 80
