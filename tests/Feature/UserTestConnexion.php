@@ -20,7 +20,7 @@ class UserTest extends TestCase
         ];
 
         // Envoyer une requête POST à /api/login
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
             'password' => 'password123'
         ]);
@@ -43,7 +43,7 @@ class UserTest extends TestCase
             'password' => bcrypt('password123'),
         ]);
 
-        $response = $this->postJson('/api/login', [
+        $response = $this->postJson('/api/auth/login', [
             'email' => 'test@example.com',
             'password' => 'wrongpassword'
         ]);
@@ -52,4 +52,25 @@ class UserTest extends TestCase
         $response->assertJson(['message' => 'Identifiants invalides']);
     }
     
+    public function test_3_connexion_avec_utilisateur_inexistant() :void
+    {
+        $response = $this->postJson('/api/auth/login', [
+            'email' => 'fake@example.com',
+            'password' => 'password123'
+        ]);
+
+        $response->assertStatus(404);
+        $response->assertJson(['message' => 'Identifiants invalides']);
+    }
+
+    public function test_4_connexion_champs_vide() : void
+    {
+        $response = $this->postJson('/api/auth/login', [
+            'email' => '',
+            'password' => ''
+        ]);
+
+        $response->assertStatus(400);
+        $response->assertJson(['message' => 'Email et mot de passe requis']);
+    }
 }
