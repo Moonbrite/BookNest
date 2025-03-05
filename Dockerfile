@@ -23,7 +23,7 @@ RUN echo '<Directory /var/www/html/public>\n\
     AllowOverride All\n\
     Require all granted\n\
     Options Indexes FollowSymLinks\n\
-</Directory>' >> /etc/apache2/sites-available/000-default.conf
+    </Directory>' >> /etc/apache2/sites-available/000-default.conf
 
 # Définir le répertoire de travail
 WORKDIR /var/www/html
@@ -49,6 +49,12 @@ RUN mkdir -p storage/logs \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 755 /var/www/html \
     && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+RUN composer require laravel/breeze --dev
+
+RUN composer require --dev nunomaduro/larastan
+
+RUN php artisan l5-swagger:generate
 
 # Exposer le port 80
 EXPOSE 80
