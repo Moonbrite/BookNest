@@ -54,7 +54,22 @@ class UserTestRegister extends TestCase
         // Vérifier le statut de réponse 400
         $response->assertStatus(400);
 
-            // Vérifier que le message d'erreur est retourné
-            $response->assertJson(['message' => 'Email déjà utilisé']);
+        // Vérifier que le message d'erreur est retourné
+        $response->assertJson(['message' => 'Email déjà utilisé']);
+    }
+
+    public function test_3_pasword_trop_court() :void
+    {
+        $response = $this->postJson('/api/auth/register', [
+            'email' => 'newuser@example.com',
+            'password' => '123',
+            "name" => "New User3"
+        ]);
+
+        // Vérifier le statut de réponse 400
+        $response->assertStatus(400);
+
+        // Vérifier que le message d'erreur est retourné
+        $response->assertJson(['message' => 'Le mot de passe doit comporter au moins 6 caractères']);
     }
 }
