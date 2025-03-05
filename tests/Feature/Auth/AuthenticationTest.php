@@ -19,7 +19,7 @@ class AuthenticationTest extends TestCase
             'password' => 'password',
         ]);
 
-        $this->assertAuthenticated();
+        $this->assertAuthenticated(true);
         $response->assertNoContent();
     }
 
@@ -41,7 +41,7 @@ class AuthenticationTest extends TestCase
 
         $response = $this->actingAs($user)->post('/logout');
 
-        $this->assertGuest();
+        $this->assertGuest(true);
         $response->assertNoContent();
     }
 }
