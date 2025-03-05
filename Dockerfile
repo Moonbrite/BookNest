@@ -52,6 +52,8 @@ RUN mkdir -p storage/logs \
 
 RUN composer require laravel/breeze --dev
 
+RUN php artisan breeze:install api
+
 RUN composer require --dev nunomaduro/larastan
 
 RUN php artisan l5-swagger:generate
